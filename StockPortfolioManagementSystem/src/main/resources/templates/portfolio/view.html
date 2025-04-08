@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Portfolio - Stock Portfolio System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Stock Portfolio System</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/dashboard}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" th:href="@{/portfolio}">Portfolio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/transactions}">Transactions</a>
+                    </li>
+                </ul>
+                <form th:action="@{/logout}" method="post">
+                    <button class="btn btn-outline-light" type="submit">Logout</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>My Portfolio</h2>
+            <a th:href="@{/portfolio/add}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Add New Stock
+            </a>
+        </div>
+
+        <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            Stock added successfully!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${param.removed}" class="alert alert-info alert-dismissible fade show" role="alert">
+            Stock removed successfully!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${param.updated}" class="alert alert-success alert-dismissible fade show" role="alert">
+            Stock updated successfully!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${param.error}">Error occurred.</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="card bg-primary text-white h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Value</h5>
+                        <h3 class="card-text">$<span th:text="${#numbers.formatDecimal(portfolio.totalValue, 1, 2)}">0.00</span></h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="card bg-success text-white h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Available Cash</h5>
+                        <h3 class="card-text">$<span th:text="${#numbers.formatDecimal(portfolio.availableCash, 1, 2)}">0.00</span></h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="card bg-info text-white h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Stocks Count</h5>
+                        <h3 class="card-text"><span th:text="${stocks.size()}">0</span></h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="card bg-warning text-dark h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Stock Value</h5>
+                        <h3 class="card-text">$<span th:text="${#numbers.formatDecimal(portfolio.totalValue - portfolio.availableCash, 1, 2)}">0.00</span></h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Portfolio Holdings</h5>
+            </div>
+            <div class="card-body">
+                <div th:if="${stocks.empty}" class="alert alert-info">
+                    Your portfolio is empty. Click "Add New Stock" to get started.
+                </div>
+                <div th:unless="${stocks.empty}" class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Name</th>
+                                <th>Quantity</th>
+                                <th>Purchase Price</th>
+                                <th>Current Price</th>
+                                <th>Total Value</th>
+                                <th>Profit/Loss</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="stock : ${stocks}">
+                                <td th:text="${stock.symbol}">AAPL</td>
+                                <td th:text="${stock.name}">Apple Inc.</td>
+                                <td th:text="${stock.quantity}">10</td>
+                                <td>$<span th:text="${#numbers.formatDecimal(stock.purchasePrice, 1, 2)}">150.00</span></td>
+                                <td>$<span th:text="${#numbers.formatDecimal(stock.currentPrice, 1, 2)}">160.00</span></td>
+                                <td>$<span th:text="${#numbers.formatDecimal(stock.currentPrice * stock.quantity, 1, 2)}">1600.00</span></td>
+                                <td th:class="${stock.profitLoss >= 0 ? 'text-success' : 'text-danger'}">
+                                    <span th:text="${stock.profitLoss >= 0 ? '+' : ''} + ${#numbers.formatDecimal(stock.profitLoss, 1, 2)}">+100.00</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a th:href="@{/portfolio/update/{id}(id=${stock.id})}" class="btn btn-warning">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a th:href="@{/portfolio/remove/{id}(id=${stock.id})}" class="btn btn-danger"
+                                           onclick="return confirm('Are you sure you want to remove this stock?')">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-light py-3 mt-5 border-top">
+        <div class="container text-center">
+            <p class="mb-0">Stock Portfolio Management System © 2025</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

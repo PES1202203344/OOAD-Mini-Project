@@ -5,6 +5,8 @@ import lombok.Data;
 import java.util.ArrayList;
 import java.util.List;
 
+//Strategy pattern was followed here
+
 @Entity
 @Data
 public class Portfolio {
